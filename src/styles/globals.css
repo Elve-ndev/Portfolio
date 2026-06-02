@@ -1,0 +1,384 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════
+   CyberFolio — globals.css  (Cyberpunk Surveillance HUD)
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --ink: #020408;
+  --cyan: #00f5ff;
+  --magenta: #ff006e;
+  --neon: #00ff41;
+  --haze: #5b7080;
+  --sidebar-w: 280px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: #cfe9ee;
+  font-family: 'Share Tech Mono', ui-monospace, monospace;
+  overflow-x: hidden;
+  /* hide native cursor on devices that support a custom one */
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Orbitron', system-ui, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+::selection {
+  background: rgba(0, 245, 255, 0.3);
+  color: #fff;
+}
+
+/* ── Scrollbar ─────────────────────────────── */
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background: #04080c;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--cyan), var(--magenta));
+  border-radius: 8px;
+}
+
+/* ═══════════════════════════════════════════
+   CUSTOM CURSOR — croix de visée cyan
+   (JS positions .cursor-core / .cursor-ring)
+   ═══════════════════════════════════════════ */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: none; }
+  a, button, input, textarea, [role='button'] { cursor: none; }
+}
+
+.cursor-core,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+}
+.cursor-core {
+  width: 22px;
+  height: 22px;
+}
+.cursor-core::before,
+.cursor-core::after {
+  content: '';
+  position: absolute;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+}
+.cursor-core::before {
+  left: 50%;
+  top: 0;
+  width: 1.5px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+.cursor-core::after {
+  top: 50%;
+  left: 0;
+  height: 1.5px;
+  width: 100%;
+  transform: translateY(-50%);
+}
+.cursor-ring {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(0, 245, 255, 0.6);
+  border-radius: 50%;
+  transition: width 0.18s ease, height 0.18s ease, border-color 0.18s ease;
+}
+.cursor-ring.is-hot {
+  width: 52px;
+  height: 52px;
+  border-color: var(--magenta);
+  box-shadow: 0 0 14px rgba(255, 0, 110, 0.5);
+}
+
+/* ═══════════════════════════════════════════
+   CRT SCAN LINES + GRAIN overlay (whole page)
+   ═══════════════════════════════════════════ */
+.fx-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+}
+.fx-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 3px
+  );
+  opacity: 0.5;
+}
+.fx-grain {
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  animation: grain-shift 0.6s steps(2) infinite;
+}
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(-2%, 1%); }
+  100% { transform: translate(1%, -1%); }
+}
+.fx-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+/* ═══════════════════════════════════════════
+   HUD building blocks
+   ═══════════════════════════════════════════ */
+@layer components {
+  .hud-panel {
+    position: relative;
+    background: linear-gradient(180deg, rgba(8, 18, 26, 0.85), rgba(2, 6, 10, 0.9));
+    border: 1px solid rgba(0, 245, 255, 0.22);
+    backdrop-filter: blur(2px);
+  }
+}
+/* animated SVG-ish corner brackets */
+.hud-corners::before,
+.hud-corners::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--cyan);
+  border-style: solid;
+}
+.hud-corners::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1.5px 0 0 1.5px;
+}
+.hud-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1.5px 1.5px 0;
+}
+
+.text-glow-cyan { text-shadow: 0 0 10px rgba(0, 245, 255, 0.7); }
+.text-glow-magenta { text-shadow: 0 0 10px rgba(255, 0, 110, 0.7); }
+.text-glow-neon { text-shadow: 0 0 10px rgba(0, 255, 65, 0.7); }
+
+/* moving scan line inside a framed element (e.g. sidebar photo) */
+.scan-sweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 38%;
+  background: linear-gradient(to bottom, transparent, rgba(0, 245, 255, 0.22), transparent);
+  animation: scan 3.5s linear infinite;
+}
+
+/* ═══════════════════════════════════════════
+   ID BADGE — holographic surveillance feed
+   ═══════════════════════════════════════════ */
+.badge-feed {
+  position: relative;
+  overflow: hidden;
+}
+.badge-feed > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.12) saturate(1.08);
+}
+.badge-feed .feed-tint {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  background: linear-gradient(155deg, rgba(0, 245, 255, 0.22), transparent 55%, rgba(255, 0, 110, 0.22));
+}
+.badge-feed .feed-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.22) 2px 3px);
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+.badge-feed .feed-glow {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 22px rgba(0, 245, 255, 0.35);
+}
+/* chromatic glitch on hover */
+.badge-feed.glitchable:hover > img {
+  animation: chroma 0.45s steps(2) infinite;
+}
+@keyframes chroma {
+  0% {
+    filter: contrast(1.12) saturate(1.08);
+    transform: translate(0, 0);
+  }
+  25% {
+    filter: contrast(1.25) saturate(1.25) drop-shadow(-3px 0 0 rgba(0, 245, 255, 0.85))
+      drop-shadow(3px 0 0 rgba(255, 0, 110, 0.85));
+    transform: translate(1px, -1px);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  75% {
+    filter: contrast(1.25) drop-shadow(2px 0 0 rgba(0, 245, 255, 0.75))
+      drop-shadow(-2px 0 0 rgba(255, 0, 110, 0.75));
+    transform: translate(1px, 0);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* glitch title */
+.glitch {
+  position: relative;
+  color: #eafdff;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0);
+}
+.glitch::before {
+  color: var(--magenta);
+  transform: translate(-2px, 0);
+  animation: glitch-a 2.6s infinite steps(2);
+  opacity: 0.7;
+}
+.glitch::after {
+  color: var(--cyan);
+  transform: translate(2px, 0);
+  animation: glitch-b 3.1s infinite steps(2);
+  opacity: 0.7;
+}
+@keyframes glitch-a {
+  0%, 92%, 100% { clip-path: inset(0 0 100% 0); }
+  93% { clip-path: inset(20% 0 40% 0); transform: translate(-3px, 1px); }
+  96% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+}
+@keyframes glitch-b {
+  0%, 90%, 100% { clip-path: inset(100% 0 0 0); }
+  91% { clip-path: inset(10% 0 70% 0); transform: translate(3px, -1px); }
+  95% { clip-path: inset(45% 0 25% 0); transform: translate(-2px, 1px); }
+}
+
+/* terminal blinking caret */
+.caret::after {
+  content: '▋';
+  margin-left: 2px;
+  animation: caret-blink 1s steps(1) infinite;
+  color: var(--neon);
+}
+@keyframes caret-blink {
+  50% { opacity: 0; }
+}
+
+/* utility: neon divider like the config's ═══ */
+.neon-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 245, 255, 0.6), transparent);
+}
+
+/* ═══════════════════════════════════════════
+   SOBER / PROFESSIONAL MODE  (toggle)
+   Clean look for corporate/consulting recruiters.
+   ═══════════════════════════════════════════ */
+html.sober .fx-overlay,
+html.sober .scan-sweep,
+html.sober .cursor-core,
+html.sober .cursor-ring {
+  display: none !important;
+}
+html.sober .glitch::before,
+html.sober .glitch::after {
+  display: none !important;
+}
+html.sober .text-glow-cyan,
+html.sober .text-glow-magenta,
+html.sober .text-glow-neon {
+  text-shadow: none !important;
+}
+html.sober .animate-flicker {
+  animation: none !important;
+  opacity: 1 !important;
+}
+html.sober .shadow-cyan,
+html.sober .shadow-magenta,
+html.sober .shadow-neon {
+  box-shadow: none !important;
+}
+/* restore the native cursor */
+html.sober,
+html.sober body,
+html.sober input,
+html.sober textarea {
+  cursor: auto !important;
+}
+html.sober a,
+html.sober button,
+html.sober [role='button'],
+html.sober .magnetic {
+  cursor: pointer !important;
+}
+/* dim the hero 3D backdrop for a calm, fast first impression */
+html.sober #home > div:first-of-type {
+  opacity: 0.16;
+}
+/* calm the ID badge feed */
+html.sober .feed-tint {
+  opacity: 0.3;
+}
+html.sober .feed-lines {
+  opacity: 0.18;
+}
+
+/* ═══════════════════════════════════════════
+   ACCESSIBILITY — respect reduced motion
+   ═══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fx-grain,
+  .scan-sweep,
+  .glitch::before,
+  .glitch::after {
+    display: none;
+  }
+}
